@@ -94,7 +94,7 @@ export const Contact: React.FC = () => {
               <div className="space-y-4">
                 {/* Email */}
                 <a
-                  href={`mailto:${contactInfo.email}`}
+                  href={`mailto:${contactInfo.email || 'pinnacledigital701@gmail.com'}`}
                   className="flex items-center gap-4 p-4 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-blue-500/40 transition-all group"
                 >
                   <div className="w-11 h-11 rounded-xl bg-blue-600/10 text-blue-400 flex items-center justify-center border border-blue-500/20 group-hover:scale-110 transition-transform shrink-0">
@@ -103,14 +103,14 @@ export const Contact: React.FC = () => {
                   <div>
                     <div className="text-[10px] text-zinc-500 font-mono uppercase">Direct Email</div>
                     <div className="text-sm font-semibold text-white group-hover:text-blue-300 transition-colors">
-                      {contactInfo.email || 'alex@axonstudio.design'}
+                      {contactInfo.email || 'pinnacledigital701@gmail.com'}
                     </div>
                   </div>
                 </a>
 
                 {/* Phone */}
                 <a
-                  href={`tel:${contactInfo.phone}`}
+                  href={`tel:${(contactInfo.phone || '+254119731229').replace(/\s+/g, '')}`}
                   className="flex items-center gap-4 p-4 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-blue-500/40 transition-all group"
                 >
                   <div className="w-11 h-11 rounded-xl bg-blue-600/10 text-blue-400 flex items-center justify-center border border-blue-500/20 group-hover:scale-110 transition-transform shrink-0">
@@ -119,14 +119,14 @@ export const Contact: React.FC = () => {
                   <div>
                     <div className="text-[10px] text-zinc-500 font-mono uppercase">Direct Phone</div>
                     <div className="text-sm font-semibold text-white group-hover:text-blue-300 transition-colors">
-                      {contactInfo.phone || '+1 (555) 234-5678'}
+                      {contactInfo.phone || '+254 119 731 229'}
                     </div>
                   </div>
                 </a>
 
                 {/* WhatsApp */}
                 <a
-                  href={`https://wa.me/${contactInfo.whatsapp.replace(/[^0-9]/g, '')}`}
+                  href={`https://wa.me/${(contactInfo.whatsapp || '254119731229').replace(/[^0-9]/g, '')}`}
                   target="_blank"
                   rel="noreferrer"
                   className="flex items-center gap-4 p-4 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-emerald-500/40 transition-all group"
@@ -137,7 +137,7 @@ export const Contact: React.FC = () => {
                   <div>
                     <div className="text-[10px] text-zinc-500 font-mono uppercase">WhatsApp Direct</div>
                     <div className="text-sm font-semibold text-white group-hover:text-emerald-300 transition-colors">
-                      {contactInfo.whatsapp || '+1 (555) 234-5678'}
+                      {contactInfo.whatsapp || '+254 119 731 229'}
                     </div>
                   </div>
                 </a>

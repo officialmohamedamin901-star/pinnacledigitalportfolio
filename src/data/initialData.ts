@@ -341,9 +341,9 @@ export const INITIAL_FAQS: FaqItem[] = [
 ];
 
 export const INITIAL_CONTACT_INFO: ContactInfo = {
-  email: 'mateo@axonstudio.design',
-  phone: '+1 (555) 234-5678',
-  whatsapp: '+1 (555) 234-5678',
+  email: 'pinnacledigital701@gmail.com',
+  phone: '+254 119 731 229',
+  whatsapp: '+254 119 731 229',
   location: 'New York, USA // Remote Worldwide',
   githubUrl: 'https://github.com',
   twitterUrl: 'https://x.com',
