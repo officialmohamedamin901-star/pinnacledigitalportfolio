@@ -147,11 +147,12 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       console.error('Error loading persistent CMS state:', err);
     });
 
-    // 4. Firestore real-time listener
+    // 4. Firestore real-time listener (sync from database)
     const unsubscribe = onSnapshot(
       doc(db, 'cms', 'config'),
       (snapshot) => {
-        if (snapshot.exists()) {
+        // Skip pending local writes to prevent temporary flickering
+        if (snapshot.exists() && !snapshot.metadata.hasPendingWrites) {
           const data = snapshot.data();
           if (data.profile) setProfile(data.profile);
           if (data.services) setServices(data.services);
@@ -164,7 +165,7 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
       },
       (error) => {
-        handleFirestoreError(error, OperationType.GET, 'cms/config');
+        console.warn('Firestore snapshot listener warning:', error);
       }
     );
 
@@ -172,7 +173,7 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, []);
 
   // Save changes to persistent storage engine (IndexedDB + localStorage + Firestore)
-  const saveStateToStorage = (updated: Record<string, unknown>) => {
+  const saveStateToStorage = async (updated: Record<string, unknown>) => {
     const current = {
       profile,
       services,
@@ -184,14 +185,20 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       theme,
       ...updated
     };
-    saveCmsState(current);
 
-    setDoc(doc(db, 'cms', 'config'), {
-      ...current,
-      updatedAt: new Date().toISOString()
-    }).catch((err) => {
-      console.warn('Firestore sync note:', err);
-    });
+    // 1. Save to local client storage engines
+    await saveCmsState(current);
+
+    // 2. Save to cloud Firestore database permanently
+    try {
+      await setDoc(doc(db, 'cms', 'config'), {
+        ...current,
+        updatedAt: new Date().toISOString()
+      });
+      console.log('Saved CMS update permanently to Firestore database.');
+    } catch (err) {
+      console.error('Firestore save failed:', err);
+    }
   };
 
   const toggleTheme = () => {

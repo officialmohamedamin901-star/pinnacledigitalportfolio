@@ -17,8 +17,8 @@ export interface ProcessedImageResult {
  */
 export const processImageFile = (
   file: File,
-  maxDimension = 1600,
-  thumbDimension = 320
+  maxDimension = 1000,
+  thumbDimension = 280
 ): Promise<ProcessedImageResult> => {
   return new Promise((resolve, reject) => {
     if (!file.type.startsWith('image/')) {
@@ -62,7 +62,15 @@ export const processImageFile = (
           ctx.imageSmoothingQuality = 'high';
           ctx.drawImage(img, 0, 0, width, height);
 
-          const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+          let quality = 0.76;
+          let dataUrl = canvas.toDataURL('image/jpeg', quality);
+
+          // Ensure dataUrl is lightweight (< 150,000 characters ~110KB) so database document limits are never exceeded
+          while (dataUrl.length > 150000 && quality > 0.35) {
+            quality -= 0.08;
+            dataUrl = canvas.toDataURL('image/jpeg', quality);
+          }
+
           const optimizedSizeKb = Math.round((dataUrl.length * 3) / 4 / 1024);
 
           // 2. Generate Compact Thumbnail
@@ -88,7 +96,7 @@ export const processImageFile = (
             thumbCtx.drawImage(img, 0, 0, thumbWidth, thumbHeight);
           }
 
-          const thumbnailUrl = thumbCanvas.toDataURL('image/jpeg', 0.72);
+          const thumbnailUrl = thumbCanvas.toDataURL('image/jpeg', 0.65);
 
           resolve({
             dataUrl,
