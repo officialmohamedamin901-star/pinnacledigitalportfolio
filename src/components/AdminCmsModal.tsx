@@ -18,12 +18,15 @@ import {
   Check,
   ShieldAlert,
   Sparkles,
-  Eye
+  Eye,
+  Loader2,
+  AlertCircle
 } from 'lucide-react';
 import { useCms } from '../context/CmsContext';
 import { PORTFOLIO_CATEGORIES } from '../data/initialData';
 import { PortfolioProject, ServiceItem, TestimonialItem, FaqItem } from '../types';
 import { ImageUploader } from './ImageUploader';
+import { uploadImageToStorage } from '../utils/firebaseStorage';
 
 export const AdminCmsModal: React.FC = () => {
   const {
@@ -81,6 +84,8 @@ export const AdminCmsModal: React.FC = () => {
     status: 'Published'
   });
   const [editingProjectId, setEditingProjectId] = useState<string | null>(null);
+  const [projectSaveLoading, setProjectSaveLoading] = useState(false);
+  const [projectSaveError, setProjectSaveError] = useState<string | null>(null);
 
   // Form states for adding service, testimonial, faq
   const [newService, setNewService] = useState({ title: '', description: '', iconName: 'Sparkles', deliverables: '' });
@@ -122,53 +127,84 @@ export const AdminCmsModal: React.FC = () => {
     alert('Contact details updated successfully!');
   };
 
-  const handleSaveProject = (e: React.FormEvent) => {
+  const handleSaveProject = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!projectForm.title || !projectForm.category) return;
 
-    const formattedTags = typeof projectForm.tags === 'string'
-      ? (projectForm.tags as string).split(',').map(s => s.trim()).filter(Boolean)
-      : projectForm.tags || ['Web Design'];
+    setProjectSaveLoading(true);
+    setProjectSaveError(null);
 
-    const projectData: PortfolioProject = {
-      id: editingProjectId || `proj-${Date.now()}`,
-      category: projectForm.category || PORTFOLIO_CATEGORIES[0],
-      title: projectForm.title || 'Untitled Project',
-      description: projectForm.description || '',
-      imageUrl: projectForm.imageUrl || '',
-      thumbnailUrl: projectForm.thumbnailUrl || projectForm.imageUrl || '',
-      tags: formattedTags,
-      isPlaceholder: false,
-      clientName: projectForm.clientName || '',
-      year: projectForm.year || '2026',
-      liveUrl: projectForm.liveUrl || '',
-      isFeatured: projectForm.isFeatured ?? false,
-      displayOrder: Number(projectForm.displayOrder) || (portfolioProjects.length + 1),
-      status: (projectForm.status as 'Published' | 'Draft') || 'Published'
-    };
+    const targetProjectId = editingProjectId || `proj-${Date.now()}`;
+    console.log(`[Save Project Step 1/4] Starting project save workflow. Document ID: "${targetProjectId}" (Is editing: ${!!editingProjectId})`);
 
-    if (editingProjectId) {
-      editPortfolioProject(projectData);
-      setEditingProjectId(null);
-    } else {
-      addPortfolioProject(projectData);
+    try {
+      let finalImageUrl = projectForm.imageUrl || '';
+      let finalThumbnailUrl = projectForm.thumbnailUrl || projectForm.imageUrl || '';
+
+      // Upload raw image dataUrl to Firebase Storage if present
+      if (finalImageUrl.startsWith('data:')) {
+        console.log('[Save Project Step 2/4] Raw base64 image payload detected. Uploading to Firebase Storage...');
+        finalImageUrl = await uploadImageToStorage(finalImageUrl, `project_${targetProjectId}`);
+        finalThumbnailUrl = finalImageUrl;
+        console.log('[Save Project Step 3/4] Firebase Storage permanent download URL obtained:', finalImageUrl);
+      } else {
+        console.log('[Save Project Step 2/4 & 3/4] Image URL is valid permanent link or empty:', finalImageUrl);
+      }
+
+      const formattedTags = typeof projectForm.tags === 'string'
+        ? (projectForm.tags as string).split(',').map(s => s.trim()).filter(Boolean)
+        : projectForm.tags || ['Web Design'];
+
+      const projectData: PortfolioProject = {
+        id: targetProjectId,
+        category: projectForm.category || PORTFOLIO_CATEGORIES[0],
+        title: projectForm.title || 'Untitled Project',
+        description: projectForm.description || '',
+        imageUrl: finalImageUrl,
+        thumbnailUrl: finalThumbnailUrl,
+        tags: formattedTags,
+        isPlaceholder: false,
+        clientName: projectForm.clientName || '',
+        year: projectForm.year || '2026',
+        liveUrl: projectForm.liveUrl || '',
+        isFeatured: projectForm.isFeatured ?? false,
+        displayOrder: Number(projectForm.displayOrder) || (portfolioProjects.length + 1),
+        status: (projectForm.status as 'Published' | 'Draft') || 'Published'
+      };
+
+      console.log(`[Save Project Step 4/4] Updating Firestore document with ID "${targetProjectId}"...`);
+
+      if (editingProjectId) {
+        await editPortfolioProject(projectData);
+        setEditingProjectId(null);
+      } else {
+        await addPortfolioProject(projectData);
+      }
+
+      console.log(`[Save Project Success] Project "${projectData.title}" saved successfully to Firestore!`);
+
+      setProjectForm({
+        category: PORTFOLIO_CATEGORIES[0],
+        title: '',
+        description: '',
+        imageUrl: '',
+        thumbnailUrl: '',
+        tags: ['Web Design', 'Custom UI'],
+        isPlaceholder: false,
+        clientName: '',
+        year: '2026',
+        liveUrl: '',
+        isFeatured: false,
+        displayOrder: portfolioProjects.length + 2,
+        status: 'Published'
+      });
+    } catch (err: any) {
+      console.error('[Save Project Error] Project update failed:', err);
+      // Requirement 6 & 7: Keep existing project intact and display the Firebase error
+      setProjectSaveError(err?.message || 'Failed to update project in Firestore. Existing project was kept intact.');
+    } finally {
+      setProjectSaveLoading(false);
     }
-
-    setProjectForm({
-      category: PORTFOLIO_CATEGORIES[0],
-      title: '',
-      description: '',
-      imageUrl: '',
-      thumbnailUrl: '',
-      tags: ['Web Design', 'Custom UI'],
-      isPlaceholder: false,
-      clientName: '',
-      year: '2026',
-      liveUrl: '',
-      isFeatured: false,
-      displayOrder: portfolioProjects.length + 2,
-      status: 'Published'
-    });
   };
 
   const handleEditProjectClick = (proj: PortfolioProject) => {
@@ -707,14 +743,31 @@ export const AdminCmsModal: React.FC = () => {
                       </div>
 
                       {/* Form Submission Controls */}
+                      {projectSaveError && (
+                        <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2 my-2">
+                          <AlertCircle size={16} className="shrink-0 text-rose-400" />
+                          <span className="font-medium">{projectSaveError}</span>
+                        </div>
+                      )}
+
                       <div className="flex items-center justify-between pt-3 border-t border-white/10">
                         <div className="flex items-center gap-2">
                           <button
                             type="submit"
-                            className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold flex items-center gap-2 shadow-lg shadow-blue-600/30 transition-all cursor-pointer"
+                            disabled={projectSaveLoading}
+                            className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:bg-blue-800/50 disabled:cursor-not-allowed text-white text-xs font-bold flex items-center gap-2 shadow-lg shadow-blue-600/30 transition-all cursor-pointer"
                           >
-                            <Plus size={15} />
-                            <span>{editingProjectId ? 'Save & Update Project' : 'Add Project To Portfolio'}</span>
+                            {projectSaveLoading ? (
+                              <>
+                                <Loader2 size={15} className="animate-spin text-white" />
+                                <span>Saving to Firestore...</span>
+                              </>
+                            ) : (
+                              <>
+                                <Plus size={15} />
+                                <span>{editingProjectId ? 'Save & Update Project' : 'Add Project To Portfolio'}</span>
+                              </>
+                            )}
                           </button>
 
                           {editingProjectId && (

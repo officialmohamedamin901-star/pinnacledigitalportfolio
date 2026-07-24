@@ -5,13 +5,13 @@ import {
   RefreshCw,
   Trash2,
   Check,
-  Sparkles,
   Link as LinkIcon,
   AlertCircle,
-  Eye,
-  FileCheck
+  FileCheck,
+  Loader2
 } from 'lucide-react';
 import { processImageFile, ProcessedImageResult } from '../utils/imageOptimizer';
+import { uploadImageToStorage } from '../utils/firebaseStorage';
 
 interface ImageUploaderProps {
   label?: string;
@@ -29,14 +29,13 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
   thumbnailUrl = '',
   onChange,
   aspectRatio = 'video',
-  helperText = 'Select an image file from your computer (PNG, JPG, WebP). Automatic compression & thumbnail generation applied.',
+  helperText = 'Select an image file from your computer (PNG, JPG, WebP). Image will be automatically uploaded to permanent Storage.',
   className = ''
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [pendingPreview, setPendingPreview] = useState<ProcessedImageResult | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [processingStatus, setProcessingStatus] = useState<string>('');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [showUrlInput, setShowUrlInput] = useState(false);
   const [customUrlInput, setCustomUrlInput] = useState('');
@@ -65,38 +64,46 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
     }
   };
 
-  // File selected from computer
+  // File selected from computer -> Upload to Firebase Storage
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     setErrorMsg(null);
-    setSelectedFile(file);
     setIsProcessing(true);
+    setProcessingStatus('Optimizing image...');
+
+    console.log(`[ImageUploader Step 1/4] Selected image file: "${file.name}" (${(file.size / 1024).toFixed(1)} KB, type: ${file.type})`);
 
     try {
+      // 1. Optimize image canvas
       const processed = await processImageFile(file);
-      setPendingPreview(processed);
-      setIsProcessing(false);
-      onChange(processed.dataUrl, processed.thumbnailUrl);
-    } catch (err: any) {
-      setIsProcessing(false);
-      setErrorMsg(err.message || 'Error processing selected image.');
-    }
-  };
+      console.log(`[ImageUploader Step 2/4] Image optimized successfully (${processed.width}x${processed.height}px, ${processed.optimizedSizeKb} KB). Starting Firebase Storage upload...`);
+      setProcessingStatus('Uploading to Firebase Storage...');
 
-  // Upload/Save Image Action
-  const handleConfirmUpload = () => {
-    if (!pendingPreview) return;
-    onChange(pendingPreview.dataUrl, pendingPreview.thumbnailUrl);
-    setUploadSuccess(true);
-    setTimeout(() => setUploadSuccess(false), 2500);
+      // 2. Upload to permanent Storage and retrieve download URL
+      const permanentUrl = await uploadImageToStorage(processed.dataUrl, label.toLowerCase().replace(/[^a-z0-9]/g, '_'));
+
+      console.log(`[ImageUploader Step 3/4] Upload completed! Permanent Storage URL: ${permanentUrl}`);
+      console.log(`[ImageUploader Step 4/4] Updating record with permanent Storage URL.`);
+
+      setIsProcessing(false);
+      setProcessingStatus('');
+      setUploadSuccess(true);
+      setTimeout(() => setUploadSuccess(false), 3000);
+
+      // Pass permanent URL to parent form
+      onChange(permanentUrl, permanentUrl);
+    } catch (err: any) {
+      console.error('[ImageUploader Error] Image upload workflow failed:', err);
+      setIsProcessing(false);
+      setProcessingStatus('');
+      setErrorMsg(err?.message || 'Firebase Storage upload failed. Keeping existing image intact.');
+    }
   };
 
   // Remove Image Action
   const handleRemoveImage = () => {
-    setSelectedFile(null);
-    setPendingPreview(null);
     setErrorMsg(null);
     onChange('', '');
     if (fileInputRef.current) {
@@ -107,12 +114,13 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
   // Manual URL Apply
   const handleApplyCustomUrl = () => {
     if (!customUrlInput.trim()) return;
+    console.log('[ImageUploader] Custom URL applied manually:', customUrlInput.trim());
     onChange(customUrlInput.trim(), customUrlInput.trim());
     setShowUrlInput(false);
     setCustomUrlInput('');
   };
 
-  const activeImage = pendingPreview?.dataUrl || imageUrl;
+  const activeImage = imageUrl;
 
   return (
     <div className={`space-y-3 ${className}`}>
@@ -153,24 +161,30 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
           <button
             type="button"
             onClick={handleApplyCustomUrl}
-            className="px-3 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold whitespace-nowrap"
+            className="px-3 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold whitespace-nowrap cursor-pointer"
           >
             Apply URL
           </button>
         </div>
       )}
 
-      {/* Error Banner */}
+      {/* Error Banner showing Firebase errors */}
       {errorMsg && (
         <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
-          <AlertCircle size={16} className="shrink-0" />
-          <span>{errorMsg}</span>
+          <AlertCircle size={16} className="shrink-0 text-rose-400" />
+          <span className="font-medium">{errorMsg}</span>
         </div>
       )}
 
       {/* Main Image Preview & Drop Area */}
       <div className="relative rounded-2xl bg-slate-950 border border-white/15 overflow-hidden group shadow-xl">
-        {activeImage ? (
+        {isProcessing ? (
+          <div className={`w-full ${getAspectClass()} flex flex-col items-center justify-center bg-slate-900/90 text-white p-6 space-y-3`}>
+            <Loader2 size={32} className="animate-spin text-blue-400" />
+            <p className="text-xs font-bold text-blue-300">{processingStatus}</p>
+            <p className="text-[11px] text-slate-400">Uploading to permanent Firebase Storage...</p>
+          </div>
+        ) : activeImage ? (
           <div className="relative w-full">
             {/* Image Preview Container maintaining proper aspect ratio & avoiding stretch */}
             <div className={`w-full ${getAspectClass()} overflow-hidden relative bg-black/60`}>
@@ -186,13 +200,8 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
               <div className="absolute top-3 left-3 z-10 flex items-center gap-2">
                 <span className="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold uppercase bg-slate-900/90 text-emerald-400 border border-emerald-500/40 backdrop-blur-md flex items-center gap-1.5 shadow-md">
                   <Check size={12} />
-                  {pendingPreview ? 'Unsaved Live Preview' : 'Active Image'}
+                  Permanent Storage Image
                 </span>
-                {pendingPreview && (
-                  <span className="px-2 py-1 rounded-full text-[10px] font-mono text-cyan-300 bg-cyan-950/80 border border-cyan-500/30 backdrop-blur-md">
-                    {pendingPreview.width}x{pendingPreview.height}px ({pendingPreview.optimizedSizeKb} KB)
-                  </span>
-                )}
               </div>
             </div>
 
@@ -208,18 +217,6 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
                   <RefreshCw size={14} className="text-blue-400" />
                   <span>Replace Image</span>
                 </button>
-
-                {/* Confirm Upload Button if live preview is pending */}
-                {pendingPreview && (
-                  <button
-                    type="button"
-                    onClick={handleConfirmUpload}
-                    className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-lg shadow-emerald-600/30 transition-all cursor-pointer"
-                  >
-                    <Upload size={14} />
-                    <span>Upload Image</span>
-                  </button>
-                )}
               </div>
 
               {/* Remove Image Button */}
@@ -240,18 +237,14 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
             className="p-8 sm:p-12 text-center flex flex-col items-center justify-center cursor-pointer hover:bg-white/[0.02] transition-all border-2 border-dashed border-white/15 hover:border-blue-500/50 rounded-2xl group"
           >
             <div className="w-14 h-14 rounded-2xl bg-blue-500/10 border border-blue-500/30 text-blue-400 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:border-blue-400 transition-all shadow-lg">
-              {isProcessing ? (
-                <RefreshCw size={24} className="animate-spin text-blue-400" />
-              ) : (
-                <ImageIcon size={26} />
-              )}
+              <ImageIcon size={26} />
             </div>
 
             <h5 className="text-sm font-bold text-white mb-1">
-              {isProcessing ? 'Processing Image File...' : 'Choose Image From Computer'}
+              Choose Image From Computer
             </h5>
             <p className="text-xs text-slate-400 max-w-xs mb-4 leading-relaxed">
-              Click to select a local file or drag & drop. Automatic optimization & aspect ratio preserving.
+              Click to select a local file. Image will be uploaded to Firebase Storage and saved permanently.
             </p>
 
             <div className="flex items-center gap-3">
@@ -264,7 +257,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
                 className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-blue-600/25 transition-all cursor-pointer"
               >
                 <Upload size={15} />
-                <span>Choose Image</span>
+                <span>Choose & Upload Image</span>
               </button>
             </div>
           </div>
@@ -275,7 +268,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
       {uploadSuccess && (
         <div className="p-2.5 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs flex items-center gap-2 font-medium">
           <FileCheck size={16} />
-          <span>Image uploaded & saved successfully!</span>
+          <span>Image uploaded & saved to permanent Storage!</span>
         </div>
       )}
 
