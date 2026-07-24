@@ -1,0 +1,51 @@
+{
+  "entities": {
+    "CmsData": {
+      "title": "CMS Portfolio Data",
+      "description": "Root document containing profile, services, portfolio projects, testimonials, faqs, contact info and inquiries",
+      "type": "object",
+      "properties": {
+        "profile": {
+          "type": "object",
+          "description": "Agency profile information"
+        },
+        "services": {
+          "type": "array",
+          "description": "List of services"
+        },
+        "portfolioProjects": {
+          "type": "array",
+          "description": "List of portfolio projects"
+        },
+        "testimonials": {
+          "type": "array",
+          "description": "List of client testimonials"
+        },
+        "faqs": {
+          "type": "array",
+          "description": "List of FAQs"
+        },
+        "contactInfo": {
+          "type": "object",
+          "description": "Contact info details"
+        },
+        "inquiries": {
+          "type": "array",
+          "description": "Client contact form inquiries"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Last updated ISO timestamp"
+        }
+      }
+    }
+  },
+  "firestore": {
+    "/cms/config": {
+      "schema": {
+        "$ref": "#/entities/CmsData"
+      },
+      "description": "Single document holding full CMS configuration and data"
+    }
+  }
+}
