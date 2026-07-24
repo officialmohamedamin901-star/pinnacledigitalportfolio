@@ -173,7 +173,7 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, []);
 
   // Save changes to persistent storage engine (IndexedDB + localStorage + Firestore)
-  const saveStateToStorage = async (updated: Record<string, unknown>) => {
+  const saveStateToStorage = async (updated: Record<string, unknown>): Promise<void> => {
     const current = {
       profile,
       services,
@@ -191,13 +191,16 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     // 2. Save to cloud Firestore database permanently
     try {
+      console.log('[CmsContext] Updating Firestore document "cms/config"...');
       await setDoc(doc(db, 'cms', 'config'), {
         ...current,
         updatedAt: new Date().toISOString()
       });
-      console.log('Saved CMS update permanently to Firestore database.');
-    } catch (err) {
-      console.error('Firestore save failed:', err);
+      console.log('[CmsContext Success] Saved CMS update permanently to Firestore database.');
+    } catch (err: any) {
+      console.error('[CmsContext Error] Firestore save failed:', err);
+      handleFirestoreError(err, OperationType.WRITE, 'cms/config');
+      throw err;
     }
   };
 
@@ -250,86 +253,86 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // CMS Handlers
   const updateProfile = (newProfile: AgencyProfile) => {
     setProfile(newProfile);
-    saveStateToStorage({ profile: newProfile });
+    return saveStateToStorage({ profile: newProfile });
   };
 
   const updateServices = (newServices: ServiceItem[]) => {
     setServices(newServices);
-    saveStateToStorage({ services: newServices });
+    return saveStateToStorage({ services: newServices });
   };
 
   const addService = (newService: ServiceItem) => {
     const next = [...services, newService];
     setServices(next);
-    saveStateToStorage({ services: next });
+    return saveStateToStorage({ services: next });
   };
 
   const deleteService = (id: string) => {
     const next = services.filter((s) => s.id !== id);
     setServices(next);
-    saveStateToStorage({ services: next });
+    return saveStateToStorage({ services: next });
   };
 
   const updatePortfolioProjects = (projects: PortfolioProject[]) => {
     setPortfolioProjects(projects);
-    saveStateToStorage({ portfolioProjects: projects });
+    return saveStateToStorage({ portfolioProjects: projects });
   };
 
   const addPortfolioProject = (project: PortfolioProject) => {
     const next = [project, ...portfolioProjects];
     setPortfolioProjects(next);
-    saveStateToStorage({ portfolioProjects: next });
+    return saveStateToStorage({ portfolioProjects: next });
   };
 
   const editPortfolioProject = (project: PortfolioProject) => {
     const next = portfolioProjects.map((p) => (p.id === project.id ? project : p));
     setPortfolioProjects(next);
-    saveStateToStorage({ portfolioProjects: next });
+    return saveStateToStorage({ portfolioProjects: next });
   };
 
   const deletePortfolioProject = (id: string) => {
     const next = portfolioProjects.filter((p) => p.id !== id);
     setPortfolioProjects(next);
-    saveStateToStorage({ portfolioProjects: next });
+    return saveStateToStorage({ portfolioProjects: next });
   };
 
   const updateTestimonials = (items: TestimonialItem[]) => {
     setTestimonials(items);
-    saveStateToStorage({ testimonials: items });
+    return saveStateToStorage({ testimonials: items });
   };
 
   const addTestimonial = (item: TestimonialItem) => {
     const next = [...testimonials, item];
     setTestimonials(next);
-    saveStateToStorage({ testimonials: next });
+    return saveStateToStorage({ testimonials: next });
   };
 
   const deleteTestimonial = (id: string) => {
     const next = testimonials.filter((t) => t.id !== id);
     setTestimonials(next);
-    saveStateToStorage({ testimonials: next });
+    return saveStateToStorage({ testimonials: next });
   };
 
   const updateFaqs = (newFaqs: FaqItem[]) => {
     setFaqs(newFaqs);
-    saveStateToStorage({ faqs: newFaqs });
+    return saveStateToStorage({ faqs: newFaqs });
   };
 
   const addFaq = (faq: FaqItem) => {
     const next = [...faqs, faq];
     setFaqs(next);
-    saveStateToStorage({ faqs: next });
+    return saveStateToStorage({ faqs: next });
   };
 
   const deleteFaq = (id: string) => {
     const next = faqs.filter((f) => f.id !== id);
     setFaqs(next);
-    saveStateToStorage({ faqs: next });
+    return saveStateToStorage({ faqs: next });
   };
 
   const updateContactInfo = (info: ContactInfo) => {
     setContactInfo(info);
-    saveStateToStorage({ contactInfo: info });
+    return saveStateToStorage({ contactInfo: info });
   };
 
   const addInquiry = (data: Omit<ProjectInquiry, 'id' | 'createdAt' | 'status'>) => {
@@ -341,7 +344,7 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
     const next = [newInquiry, ...inquiries];
     setInquiries(next);
-    saveStateToStorage({ inquiries: next });
+    return saveStateToStorage({ inquiries: next });
   };
 
   const resetAllToDefault = () => {

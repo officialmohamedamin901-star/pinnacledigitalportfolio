@@ -82,7 +82,13 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
       setProcessingStatus('Uploading to Firebase Storage...');
 
       // 2. Upload to permanent Storage and retrieve download URL
-      const permanentUrl = await uploadImageToStorage(processed.dataUrl, label.toLowerCase().replace(/[^a-z0-9]/g, '_'));
+      const permanentUrl = await uploadImageToStorage(
+        processed.dataUrl,
+        label.toLowerCase().replace(/[^a-z0-9]/g, '_'),
+        (pct) => {
+          setProcessingStatus(`Uploading to Firebase Storage (${pct}%)...`);
+        }
+      );
 
       console.log(`[ImageUploader Step 3/4] Upload completed! Permanent Storage URL: ${permanentUrl}`);
       console.log(`[ImageUploader Step 4/4] Updating record with permanent Storage URL.`);
