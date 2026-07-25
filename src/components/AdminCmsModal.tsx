@@ -26,7 +26,7 @@ import { useCms } from '../context/CmsContext';
 import { PORTFOLIO_CATEGORIES } from '../data/initialData';
 import { PortfolioProject, ServiceItem, TestimonialItem, FaqItem } from '../types';
 import { ImageUploader } from './ImageUploader';
-import { uploadImageToStorage } from '../utils/supabaseStorage';
+import { uploadImageToStorage } from '../utils/firebaseStorage';
 
 export const AdminCmsModal: React.FC = () => {
   const {

@@ -11,7 +11,7 @@ import {
   Loader2
 } from 'lucide-react';
 import { processImageFile, ProcessedImageResult } from '../utils/imageOptimizer';
-import { uploadImageToStorage } from '../utils/supabaseStorage';
+import { uploadImageToStorage } from '../utils/firebaseStorage';
 
 interface ImageUploaderProps {
   label?: string;

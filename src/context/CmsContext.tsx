@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { supabase, handleSupabaseError, OperationType } from '../supabase';
+import { doc, onSnapshot, setDoc } from 'firebase/firestore';
+import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
+import { db, auth, handleFirestoreError, OperationType } from '../firebase';
 import {
   AgencyProfile,
   ServiceItem,
@@ -146,60 +148,33 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       console.error('Error loading persistent CMS state:', err);
     });
 
-    // 4. Supabase real-time sync & initial load
-    const fetchSupabaseData = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('cms_config')
-          .select('data')
-          .eq('id', 'config')
-          .single();
-
-        if (!error && data && data.data) {
-          const config = data.data;
-          if (config.profile) setProfile(config.profile);
-          if (config.services) setServices(config.services);
-          if (config.portfolioProjects) setPortfolioProjects(config.portfolioProjects);
-          if (config.testimonials) setTestimonials(config.testimonials);
-          if (config.faqs) setFaqs(config.faqs);
-          if (config.contactInfo) setContactInfo(config.contactInfo);
-          if (config.inquiries) setInquiries(config.inquiries);
-          if (config.theme) setTheme(config.theme);
+    // 4. Firestore real-time sync & initial load
+    const unsubscribe = onSnapshot(
+      doc(db, 'cms', 'config'),
+      (snapshot) => {
+        if (snapshot.exists() && !snapshot.metadata.hasPendingWrites) {
+          const data = snapshot.data();
+          if (data.profile) setProfile(data.profile);
+          if (data.services) setServices(data.services);
+          if (data.portfolioProjects) setPortfolioProjects(data.portfolioProjects);
+          if (data.testimonials) setTestimonials(data.testimonials);
+          if (data.faqs) setFaqs(data.faqs);
+          if (data.contactInfo) setContactInfo(data.contactInfo);
+          if (data.inquiries) setInquiries(data.inquiries);
+          if (data.theme) setTheme(data.theme);
         }
-      } catch (err) {
-        console.warn('Supabase fetch notice:', err);
+      },
+      (error) => {
+        console.warn('Firestore snapshot listener warning:', error);
       }
-    };
-
-    fetchSupabaseData();
-
-    const channel = supabase
-      .channel('cms_config_changes')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'cms_config' },
-        (payload) => {
-          if (payload.new && (payload.new as any).data) {
-            const data = (payload.new as any).data;
-            if (data.profile) setProfile(data.profile);
-            if (data.services) setServices(data.services);
-            if (data.portfolioProjects) setPortfolioProjects(data.portfolioProjects);
-            if (data.testimonials) setTestimonials(data.testimonials);
-            if (data.faqs) setFaqs(data.faqs);
-            if (data.contactInfo) setContactInfo(data.contactInfo);
-            if (data.inquiries) setInquiries(data.inquiries);
-            if (data.theme) setTheme(data.theme);
-          }
-        }
-      )
-      .subscribe();
+    );
 
     return () => {
-      supabase.removeChannel(channel);
+      unsubscribe();
     };
   }, []);
 
-  // Save changes to persistent storage engine (IndexedDB + localStorage + Supabase)
+  // Save changes to persistent storage engine (IndexedDB + localStorage + Firestore)
   const saveStateToStorage = async (updated: Record<string, unknown>): Promise<void> => {
     const current = {
       profile,
@@ -216,21 +191,18 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // 1. Save to local client storage engines
     await saveCmsState(current);
 
-    // 2. Save to cloud Supabase database permanently
+    // 2. Save to cloud Firestore database permanently
     try {
-      console.log('[CmsContext] Updating Supabase table "cms_config"...');
-      const { error } = await supabase
-        .from('cms_config')
-        .upsert({ id: 'config', data: current, updated_at: new Date().toISOString() });
-
-      if (error) {
-        console.error('[CmsContext Error] Supabase upsert failed:', error);
-        handleSupabaseError(error, OperationType.WRITE, 'cms_config');
-      } else {
-        console.log('[CmsContext Success] Saved CMS update permanently to Supabase database.');
-      }
+      console.log('[CmsContext] Updating Firestore document "cms/config"...');
+      await setDoc(doc(db, 'cms', 'config'), {
+        ...current,
+        updatedAt: new Date().toISOString()
+      });
+      console.log('[CmsContext Success] Saved CMS update permanently to Firestore database.');
     } catch (err: any) {
-      console.error('[CmsContext Error] Supabase save failed:', err);
+      console.error('[CmsContext Error] Firestore save failed:', err);
+      handleFirestoreError(err, OperationType.WRITE, 'cms/config');
+      throw err;
     }
   };
 
@@ -256,18 +228,16 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const loginAdmin = async (passcode: string) => {
     const trimmed = passcode.trim();
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: trimmed.includes('@') ? trimmed : 'admin@axonstudio.design',
-        password: trimmed
-      });
-      if (!error && data.user) {
+      const email = trimmed.includes('@') ? trimmed : 'admin@axonstudio.design';
+      const userCred = await signInWithEmailAndPassword(auth, email, trimmed);
+      if (userCred.user) {
         setIsAdminAuthenticated(true);
         sessionStorage.setItem('cms_admin_auth_session', 'true');
         localStorage.setItem('cms_admin_auth_session', 'true');
         return true;
       }
     } catch (e) {
-      console.warn('Supabase auth attempt:', e);
+      console.warn('Firebase auth attempt:', e);
     }
 
     // Validate passcode against accepted admin passcodes as fallback
@@ -289,7 +259,7 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const logoutAdmin = async () => {
     try {
-      await supabase.auth.signOut();
+      await signOut(auth);
     } catch (e) {}
     setIsAdminAuthenticated(false);
     try {

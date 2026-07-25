@@ -1,0 +1,30 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128;
+    }
+
+    match /cms/config {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    match /inquiries/{inquiryId} {
+      allow read: if isSignedIn();
+      allow create: if isValidId(inquiryId);
+      allow update, delete: if isSignedIn() && isValidId(inquiryId);
+    }
+  }
+}

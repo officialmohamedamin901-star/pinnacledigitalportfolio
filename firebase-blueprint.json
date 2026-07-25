@@ -1,0 +1,40 @@
+{
+  "entities": {
+    "CmsConfig": {
+      "title": "CMS Configuration",
+      "description": "Global CMS content configuration including profile, services, portfolio, and settings",
+      "type": "object",
+      "properties": {
+        "updatedAt": {
+          "type": "string",
+          "description": "ISO timestamp of last update"
+        }
+      }
+    },
+    "ProjectInquiry": {
+      "title": "Project Inquiry",
+      "description": "Contact form project inquiries submitted by site visitors",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "clientName": { "type": "string" },
+        "clientEmail": { "type": "string" },
+        "service": { "type": "string" },
+        "budget": { "type": "string" },
+        "message": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["clientName", "clientEmail", "service", "message"]
+    }
+  },
+  "firestore": {
+    "/cms/config": {
+      "schema": { "$ref": "#/entities/CmsConfig" },
+      "description": "Main CMS settings and content payload document"
+    },
+    "/inquiries/{inquiryId}": {
+      "schema": { "$ref": "#/entities/ProjectInquiry" },
+      "description": "Individual client project inquiry submissions"
+    }
+  }
+}
