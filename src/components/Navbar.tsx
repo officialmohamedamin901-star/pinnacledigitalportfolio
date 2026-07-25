@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion, useScroll, useSpring } from 'motion/react';
+import { motion, AnimatePresence, useScroll, useSpring } from 'motion/react';
 import { Sun, Moon, Shield, Menu, X, ArrowUpRight, Sparkles } from 'lucide-react';
 import { useCms } from '../context/CmsContext';
 
@@ -34,6 +34,18 @@ export const Navbar: React.FC = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [mobileMenuOpen]);
+
   const navLinks = [
     { name: 'Portfolio', href: '#portfolio' },
     { name: 'About', href: '#about' },
@@ -52,7 +64,7 @@ export const Navbar: React.FC = () => {
         style={{ scaleX }}
       />
 
-      <div className={`transition-all duration-300 ${isScrolled ? 'py-3 bg-black/80 backdrop-blur-xl border-b border-white/10' : 'py-6'}`}>
+      <div className={`transition-all duration-300 ${isScrolled ? 'py-3 bg-black/85 backdrop-blur-xl border-b border-white/10' : 'py-5 sm:py-6'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <nav className="flex items-center justify-between">
             
@@ -72,7 +84,7 @@ export const Navbar: React.FC = () => {
             </a>
 
             {/* Desktop Nav Links */}
-            <div className="hidden md:flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-white/[0.03] border border-white/10 backdrop-blur-md">
+            <div className="hidden lg:flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-white/[0.03] border border-white/10 backdrop-blur-md">
               {navLinks.map((link) => (
                 <motion.a
                   key={link.name}
@@ -86,15 +98,15 @@ export const Navbar: React.FC = () => {
               ))}
             </div>
 
-            {/* Action CTAs */}
-            <div className="hidden sm:flex items-center gap-3">
+            {/* Action CTAs Desktop */}
+            <div className="hidden lg:flex items-center gap-3">
               {/* Theme Switcher */}
               <motion.button
                 whileHover={{ scale: 1.06 }}
                 whileTap={{ scale: 0.94 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 25 }}
                 onClick={toggleTheme}
-                className="p-2 rounded-xl text-zinc-400 hover:text-white bg-white/[0.03] border border-white/10 transition-colors cursor-pointer"
+                className="p-2.5 rounded-xl text-zinc-400 hover:text-white bg-white/[0.03] border border-white/10 transition-colors cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
                 title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} mode`}
                 aria-label="Toggle theme"
               >
@@ -107,7 +119,7 @@ export const Navbar: React.FC = () => {
                 whileTap={{ scale: 0.97 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 25 }}
                 onClick={() => setIsAdminOpen(true)}
-                className="px-3 py-2 rounded-xl text-xs font-mono font-semibold text-blue-300 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 flex items-center gap-1.5 transition-all cursor-pointer"
+                className="px-3.5 py-2.5 rounded-xl text-xs font-mono font-semibold text-blue-300 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 flex items-center gap-1.5 transition-all cursor-pointer min-h-[44px]"
                 title="Open CMS Admin"
               >
                 <Shield size={13} className="text-blue-400" />
@@ -120,73 +132,87 @@ export const Navbar: React.FC = () => {
                 whileTap={{ scale: 0.96 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 25 }}
                 onClick={() => setIsProjectModalOpen(true)}
-                className="px-4 py-2 text-xs font-bold rounded-xl bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-600/20 transition-all flex items-center gap-1.5 cursor-pointer"
+                className="px-4 py-2.5 text-xs font-bold rounded-xl bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-600/20 transition-all flex items-center gap-1.5 cursor-pointer min-h-[44px]"
               >
                 <span>Initiate Project</span>
                 <ArrowUpRight size={14} />
               </motion.button>
             </div>
 
-            {/* Mobile Menu Trigger */}
-            <div className="flex sm:hidden items-center gap-2">
+            {/* Mobile & Tablet Hamburger Menu Trigger */}
+            <div className="flex lg:hidden items-center gap-2">
+              {/* Quick Theme Switcher on Header */}
+              <button
+                onClick={toggleTheme}
+                className="p-2.5 rounded-xl text-zinc-300 bg-white/[0.05] border border-white/10 min-h-[44px] min-w-[44px] flex items-center justify-center"
+                title="Toggle Theme"
+                aria-label="Toggle Theme"
+              >
+                {theme === 'dark' ? <Sun size={16} className="text-amber-400" /> : <Moon size={16} className="text-indigo-400" />}
+              </button>
+
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="p-2.5 rounded-xl text-white bg-white/[0.05] border border-white/10"
-                aria-label="Toggle menu"
+                className="p-2.5 rounded-xl text-white bg-white/[0.05] border border-white/10 min-h-[44px] min-w-[44px] flex items-center justify-center"
+                aria-label="Toggle navigation menu"
               >
-                {mobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
+                {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
               </button>
             </div>
           </nav>
         </div>
       </div>
 
-      {/* Mobile Nav Drawer */}
-      {mobileMenuOpen && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
-          className="sm:hidden bg-black/95 border-b border-white/10 px-4 py-6"
-        >
-          <div className="flex flex-col gap-4">
-            {navLinks.map((link) => (
-              <a
-                key={link.name}
-                href={link.href}
-                onClick={() => setMobileMenuOpen(false)}
-                className="text-sm font-semibold text-zinc-200 hover:text-blue-400 py-1.5 border-b border-white/5"
-              >
-                {link.name}
-              </a>
-            ))}
+      {/* Mobile & Tablet Nav Drawer Overlay */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            className="lg:hidden bg-[#0a0a0c]/98 backdrop-blur-2xl border-b border-white/10 px-4 sm:px-6 py-6 shadow-2xl overflow-hidden max-h-[calc(100vh-80px)] overflow-y-auto"
+          >
+            <div className="flex flex-col gap-3">
+              {navLinks.map((link) => (
+                <a
+                  key={link.name}
+                  href={link.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-base font-semibold text-zinc-200 hover:text-blue-400 py-2.5 border-b border-white/5 flex items-center justify-between transition-colors min-h-[44px]"
+                >
+                  <span>{link.name}</span>
+                  <ArrowUpRight size={14} className="text-zinc-500" />
+                </a>
+              ))}
 
-            <div className="pt-2 flex flex-col gap-2.5">
-              <button
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  setIsAdminOpen(true);
-                }}
-                className="w-full py-2.5 text-xs font-mono text-blue-300 bg-blue-500/10 rounded-xl border border-blue-500/30 flex items-center justify-center gap-2"
-              >
-                <Shield size={14} />
-                <span>CMS Admin Dashboard</span>
-              </button>
+              <div className="pt-3 flex flex-col gap-3">
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    setIsAdminOpen(true);
+                  }}
+                  className="w-full py-3 text-xs font-mono text-blue-300 bg-blue-500/10 hover:bg-blue-500/20 rounded-xl border border-blue-500/30 flex items-center justify-center gap-2 transition-all min-h-[44px]"
+                >
+                  <Shield size={15} />
+                  <span>CMS Admin Dashboard</span>
+                </button>
 
-              <button
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  setIsProjectModalOpen(true);
-                }}
-                className="w-full py-3 text-xs font-bold rounded-xl bg-blue-600 text-white flex items-center justify-center gap-2 shadow-lg"
-              >
-                <span>Initiate Project</span>
-                <ArrowUpRight size={16} />
-              </button>
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    setIsProjectModalOpen(true);
+                  }}
+                  className="w-full py-3.5 text-xs font-bold rounded-xl bg-blue-600 hover:bg-blue-500 text-white flex items-center justify-center gap-2 shadow-lg shadow-blue-600/30 transition-all min-h-[44px]"
+                >
+                  <span>Initiate Project</span>
+                  <ArrowUpRight size={16} />
+                </button>
+              </div>
             </div>
-          </div>
-        </motion.div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   );
 };

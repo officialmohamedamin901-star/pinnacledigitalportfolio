@@ -259,15 +259,15 @@ export const Portfolio: React.FC = () => {
               const isSecondarySecond = index === 2;
 
               // Asymmetrical Layout Spanning
-              let colSpanClass = 'lg:col-span-6';
+              let colSpanClass = 'md:col-span-1 lg:col-span-6';
               if (isFeatured) {
-                colSpanClass = 'lg:col-span-12';
+                colSpanClass = 'md:col-span-2 lg:col-span-12';
               } else if (isSecondaryFirst) {
-                colSpanClass = 'lg:col-span-7';
+                colSpanClass = 'md:col-span-1 lg:col-span-7';
               } else if (isSecondarySecond) {
-                colSpanClass = 'lg:col-span-5';
+                colSpanClass = 'md:col-span-1 lg:col-span-5';
               } else {
-                colSpanClass = index % 3 === 0 ? 'lg:col-span-7' : 'lg:col-span-5';
+                colSpanClass = index % 3 === 0 ? 'md:col-span-1 lg:col-span-7' : 'md:col-span-1 lg:col-span-5';
               }
 
               // Index Number Formatter

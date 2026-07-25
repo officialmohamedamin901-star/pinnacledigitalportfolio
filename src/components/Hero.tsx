@@ -118,7 +118,7 @@ export const Hero: React.FC = () => {
             </motion.div>
 
             {/* Oversized Headline */}
-            <motion.div variants={itemVariants} className="space-y-2 mb-6">
+            <motion.div variants={itemVariants} className="space-y-2 mb-6 w-full">
               <div className="text-xs sm:text-sm font-mono tracking-widest text-blue-400 uppercase font-semibold flex items-center gap-2">
                 <span className="w-6 h-px bg-blue-500" />
                 <span>{profile.fullName || 'MATEO SANCHEZ'}</span>
@@ -134,21 +134,21 @@ export const Hero: React.FC = () => {
                 ))}
               </div>
 
-              <h1 className="text-5xl sm:text-7xl lg:text-8xl xl:text-[6.25rem] font-black tracking-tighter text-white leading-[0.9] font-heading pt-2">
+              <h1 className="text-3xl xs:text-4xl sm:text-7xl lg:text-8xl xl:text-[6.25rem] font-black tracking-tighter text-white leading-[0.95] sm:leading-[0.9] font-heading pt-2 break-words">
                 CRAFTING <br />
                 <span className="text-gradient font-serif italic font-normal">DIGITAL</span> FLAGSHIPS.
               </h1>
             </motion.div>
 
             {/* Narrative Story (Instead of generic paragraph) */}
-            <motion.div variants={itemVariants} className="space-y-5 mb-8 max-w-xl">
-              <p className="text-base sm:text-lg text-zinc-300 font-light leading-relaxed max-w-[55ch]">
+            <motion.div variants={itemVariants} className="space-y-5 mb-8 max-w-xl w-full">
+              <p className="text-sm sm:text-lg text-zinc-300 font-light leading-relaxed max-w-[55ch]">
                 I bridge human-centered design with high-performance web architecture. Instead of generic corporate templates, I build bespoke platforms engineered to elevate brand authority and convert visitors into loyal clients.
               </p>
 
               {/* Memorable Personal Sentence */}
               <div className="border-l-2 border-blue-500 pl-4 py-1.5">
-                <p className="text-sm sm:text-base text-zinc-200 font-serif italic font-normal leading-relaxed max-w-[50ch]">
+                <p className="text-xs sm:text-base text-zinc-200 font-serif italic font-normal leading-relaxed max-w-[50ch]">
                   "Design is not just how it looks—it is the single highest-leverage asset for ambitious founders."
                 </p>
               </div>
@@ -157,14 +157,14 @@ export const Hero: React.FC = () => {
             {/* Minimal Action Buttons */}
             <motion.div
               variants={itemVariants}
-              className="flex flex-wrap items-center gap-5 w-full sm:w-auto mb-10"
+              className="flex flex-col xs:flex-row items-stretch xs:items-center gap-3.5 w-full sm:w-auto mb-10"
             >
               <motion.button
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
                 transition={{ type: 'spring', stiffness: 350, damping: 22 }}
                 onClick={() => setIsProjectModalOpen(true)}
-                className="px-8 py-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm tracking-wide shadow-lg shadow-blue-600/25 transition-all duration-300 flex items-center justify-center gap-2.5 group border border-blue-400/30 cursor-pointer"
+                className="px-7 py-3.5 sm:py-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs sm:text-sm tracking-wide shadow-lg shadow-blue-600/25 transition-all duration-300 flex items-center justify-center gap-2.5 group border border-blue-400/30 cursor-pointer min-h-[44px]"
               >
                 <span>Initiate Project Brief</span>
                 <ArrowUpRight size={18} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
@@ -175,7 +175,7 @@ export const Hero: React.FC = () => {
                 whileTap={{ scale: 0.98 }}
                 transition={{ type: 'spring', stiffness: 350, damping: 22 }}
                 href="#portfolio"
-                className="px-6 py-4 rounded-xl text-zinc-300 hover:text-white font-mono text-xs uppercase tracking-widest transition-colors flex items-center gap-2 group"
+                className="px-6 py-3.5 sm:py-4 rounded-xl text-zinc-300 hover:text-white font-mono text-xs uppercase tracking-widest transition-colors flex items-center justify-center gap-2 group min-h-[44px] bg-white/[0.03] sm:bg-transparent border border-white/10 sm:border-transparent"
               >
                 <span>Explore Selected Works</span>
                 <Compass size={16} className="text-zinc-500 group-hover:text-blue-400 transition-colors" />
@@ -185,19 +185,19 @@ export const Hero: React.FC = () => {
             {/* Clean Keyframe Metrics */}
             <motion.div
               variants={itemVariants}
-              className="grid grid-cols-3 gap-8 pt-6 border-t border-white/10 w-full max-w-xl"
+              className="grid grid-cols-3 gap-3 sm:gap-8 pt-6 border-t border-white/10 w-full max-w-xl"
             >
               <div>
-                <div className="text-2xl sm:text-3xl font-black font-heading text-white">8+ Yrs</div>
-                <div className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider mt-1">Experience</div>
+                <div className="text-xl sm:text-3xl font-black font-heading text-white">8+ Yrs</div>
+                <div className="text-[10px] sm:text-[11px] font-mono text-zinc-400 uppercase tracking-wider mt-1">Experience</div>
               </div>
               <div>
-                <div className="text-2xl sm:text-3xl font-black font-heading text-blue-400">140+</div>
-                <div className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider mt-1">Commissions</div>
+                <div className="text-xl sm:text-3xl font-black font-heading text-blue-400">140+</div>
+                <div className="text-[10px] sm:text-[11px] font-mono text-zinc-400 uppercase tracking-wider mt-1">Commissions</div>
               </div>
               <div>
-                <div className="text-2xl sm:text-3xl font-black font-heading text-white">100%</div>
-                <div className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider mt-1">Custom Craft</div>
+                <div className="text-xl sm:text-3xl font-black font-heading text-white">100%</div>
+                <div className="text-[10px] sm:text-[11px] font-mono text-zinc-400 uppercase tracking-wider mt-1">Custom Craft</div>
               </div>
             </motion.div>
 

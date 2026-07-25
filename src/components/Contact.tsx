@@ -84,7 +84,7 @@ export const Contact: React.FC = () => {
           
           {/* Left Column: Direct Contact Details & Social Links */}
           <div className="lg:col-span-5 space-y-6">
-            <div className="p-8 sm:p-10 rounded-3xl bg-white/[0.02] border border-white/10 relative overflow-hidden space-y-6">
+            <div className="p-6 sm:p-10 rounded-3xl bg-white/[0.02] border border-white/10 relative overflow-hidden space-y-6">
               
               <h3 className="text-2xl font-bold font-heading text-white flex items-center gap-2">
                 <Sparkles size={20} className="text-blue-400" />
@@ -183,7 +183,7 @@ export const Contact: React.FC = () => {
             </div>
 
             {/* Artistic Low-Poly Stylized Global Coverage Map Visual */}
-            <div className="p-8 rounded-3xl bg-white/[0.02] border border-white/10 relative overflow-hidden group hover:border-blue-500/30 transition-all duration-500">
+            <div className="p-5 sm:p-8 rounded-3xl bg-white/[0.02] border border-white/10 relative overflow-hidden group hover:border-blue-500/30 transition-all duration-500">
               <div className="flex items-center justify-between mb-4 z-10 relative">
                 <div className="flex items-center gap-2 text-xs font-mono tracking-wider text-blue-400 uppercase font-semibold">
                   <Globe size={14} className="animate-spin-slow" />
@@ -286,7 +286,7 @@ export const Contact: React.FC = () => {
 
           {/* Right Column: High-Craft Inquiry Form */}
           <div className="lg:col-span-7">
-            <div className="p-8 sm:p-10 rounded-3xl bg-white/[0.02] border border-white/10 relative">
+            <div className="p-6 sm:p-10 rounded-3xl bg-white/[0.02] border border-white/10 relative">
               <h3 className="text-2xl font-bold font-heading text-white mb-6">
                 Submit A Direct Project Inquiry
               </h3>
@@ -386,7 +386,7 @@ export const Contact: React.FC = () => {
                           whileTap={{ scale: 0.97 }}
                           transition={{ type: 'spring', stiffness: 400, damping: 25 }}
                           onClick={() => setFormData({ ...formData, budgetRange: opt })}
-                          className={`py-2.5 px-3 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
+                          className={`py-2.5 px-3 rounded-xl text-xs font-semibold border transition-all cursor-pointer min-h-[44px] flex items-center justify-center ${
                             formData.budgetRange === opt
                               ? 'bg-blue-600 text-white border-blue-500 shadow-lg shadow-blue-600/25'
                               : 'bg-white/[0.03] text-zinc-400 border-white/5 hover:text-white'

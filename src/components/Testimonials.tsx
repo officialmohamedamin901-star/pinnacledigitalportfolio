@@ -27,7 +27,7 @@ export const Testimonials: React.FC = () => {
         </div>
 
         {/* Editorial Testimonials Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
           {testimonials.map((item, index) => (
             <motion.div
               key={item.id}
@@ -35,7 +35,7 @@ export const Testimonials: React.FC = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
-              className="group relative flex flex-col justify-between p-8 rounded-3xl bg-white/[0.02] border border-white/10 hover:border-blue-500/40 transition-all duration-300 hover:shadow-2xl hover:shadow-blue-600/10 h-full"
+              className="group relative flex flex-col justify-between p-6 sm:p-8 rounded-3xl bg-white/[0.02] border border-white/10 hover:border-blue-500/40 transition-all duration-300 hover:shadow-2xl hover:shadow-blue-600/10 h-full"
             >
               <div>
                 {/* Header Quote Icon & Rating */}

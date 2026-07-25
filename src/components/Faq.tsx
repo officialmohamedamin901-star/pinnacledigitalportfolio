@@ -63,15 +63,15 @@ export const Faq: React.FC = () => {
               >
                 <button
                   onClick={() => toggleAccordion(item.id)}
-                  className="w-full p-6 text-left flex items-center justify-between gap-4 group"
+                  className="w-full p-4 sm:p-6 text-left flex items-center justify-between gap-3 sm:gap-4 group min-h-[44px]"
                 >
                   <div className="flex items-center gap-3">
                     <HelpCircle size={20} className="text-blue-400 shrink-0" />
-                    <span className="font-heading font-bold text-base sm:text-lg text-white group-hover:text-blue-300 transition-colors">
+                    <span className="font-heading font-bold text-sm sm:text-lg text-white group-hover:text-blue-300 transition-colors">
                       {item.question}
                     </span>
                   </div>
-                  <div className={`p-2 rounded-xl bg-white/[0.04] border border-white/10 text-zinc-300 transition-transform duration-300 ${isOpen ? 'rotate-180 bg-blue-500/20 text-blue-400' : ''}`}>
+                  <div className={`p-2 rounded-xl bg-white/[0.04] border border-white/10 text-zinc-300 transition-transform duration-300 shrink-0 ${isOpen ? 'rotate-180 bg-blue-500/20 text-blue-400' : ''}`}>
                     <ChevronDown size={18} />
                   </div>
                 </button>
@@ -83,7 +83,7 @@ export const Faq: React.FC = () => {
                       animate={{ opacity: 1, height: 'auto' }}
                       exit={{ opacity: 0, height: 0 }}
                       transition={{ duration: 0.3 }}
-                      className="px-6 pb-6 pt-0 border-t border-white/5 text-xs sm:text-sm text-zinc-300 leading-relaxed font-light"
+                      className="px-4 sm:px-6 pb-4 sm:pb-6 pt-0 border-t border-white/5 text-xs sm:text-sm text-zinc-300 leading-relaxed font-light"
                     >
                       <div className="pt-4">{item.answer}</div>
                     </motion.div>

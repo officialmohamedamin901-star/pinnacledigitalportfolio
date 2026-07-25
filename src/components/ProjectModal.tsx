@@ -132,19 +132,19 @@ export const ProjectModal: React.FC = () => {
           </div>
 
           {/* Footer Actions */}
-          <div className="p-6 border-t border-white/10 bg-slate-900/60 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="p-4 sm:p-6 border-t border-white/10 bg-slate-900/60 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
             {selectedProject.liveUrl ? (
               <a
                 href={selectedProject.liveUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="w-full sm:w-auto px-6 py-3 rounded-xl bg-cyan-500 text-slate-950 font-bold text-xs hover:bg-cyan-400 transition-all flex items-center justify-center gap-2"
+                className="w-full sm:w-auto px-6 py-3 rounded-xl bg-cyan-500 text-slate-950 font-bold text-xs hover:bg-cyan-400 transition-all flex items-center justify-center gap-2 min-h-[44px]"
               >
                 <span>Visit Live Site</span>
                 <ExternalLink size={14} />
               </a>
             ) : (
-              <span className="text-xs text-slate-400 font-mono">
+              <span className="text-xs text-slate-400 font-mono text-center sm:text-left">
                 [Live URL Placeholder]
               </span>
             )}
@@ -155,7 +155,7 @@ export const ProjectModal: React.FC = () => {
                 setSelectedServiceForModal(selectedProject.category);
                 setIsProjectModalOpen(true);
               }}
-              className="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold text-xs hover:scale-[1.02] transition-all flex items-center justify-center gap-2 shadow-lg"
+              className="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold text-xs hover:scale-[1.02] transition-all flex items-center justify-center gap-2 shadow-lg min-h-[44px]"
             >
               <span>Build Similar Website For My Business</span>
               <Sparkles size={14} />

@@ -173,7 +173,7 @@ export const ProjectStartModal: React.FC = () => {
                         key={opt}
                         type="button"
                         onClick={() => setFormData({ ...formData, budgetRange: opt })}
-                        className={`py-2 px-3 rounded-xl text-xs font-medium border transition-all ${
+                        className={`py-2 px-3 rounded-xl text-xs font-medium border transition-all min-h-[44px] flex items-center justify-center ${
                           formData.budgetRange === opt
                             ? 'bg-cyan-500/20 text-cyan-300 border-cyan-400/60'
                             : 'glass-panel text-slate-400 border-white/5'
@@ -202,7 +202,7 @@ export const ProjectStartModal: React.FC = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-3 px-6 rounded-xl bg-gradient-to-r from-cyan-500 via-blue-600 to-purple-600 text-white font-bold text-xs shadow-xl hover:scale-[1.01] transition-all flex items-center justify-center gap-2"
+                  className="w-full py-3 px-6 rounded-xl bg-gradient-to-r from-cyan-500 via-blue-600 to-purple-600 text-white font-bold text-xs shadow-xl hover:scale-[1.01] transition-all flex items-center justify-center gap-2 min-h-[44px]"
                 >
                   {loading ? 'Submitting Request...' : 'Send Project Proposal Request'}
                   <Send size={14} />

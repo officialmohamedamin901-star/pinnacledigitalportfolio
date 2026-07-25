@@ -53,7 +53,7 @@ export const Process: React.FC = () => {
 
                   {/* Card Box */}
                   <div className="w-full lg:w-[calc(50%-3rem)]">
-                    <div className="p-8 rounded-3xl bg-white/[0.02] border border-white/10 hover:border-blue-500/40 transition-all duration-300 relative group">
+                    <div className="p-6 sm:p-8 rounded-3xl bg-white/[0.02] border border-white/10 hover:border-blue-500/40 transition-all duration-300 relative group">
                       <div className="flex items-center justify-between mb-4">
                         <h3 className="text-2xl font-bold font-heading text-white group-hover:text-blue-400 transition-colors">
                           {step.title}

@@ -73,9 +73,9 @@ export const AboutMe: React.FC = () => {
               </div>
 
               {/* Floating Stat Badge */}
-              <div className="absolute -bottom-6 -right-4 sm:right-2 px-5 py-3.5 rounded-2xl bg-black/90 backdrop-blur-xl border border-white/15 shadow-2xl flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-blue-600/20 text-blue-400 flex items-center justify-center border border-blue-500/30">
-                  <Award size={20} />
+              <div className="sm:absolute relative mt-4 sm:mt-0 sm:-bottom-6 sm:-right-2 px-4 sm:px-5 py-3 sm:py-3.5 rounded-2xl bg-black/90 backdrop-blur-xl border border-white/15 shadow-2xl flex items-center gap-3 max-w-fit mx-auto sm:mx-0">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-blue-600/20 text-blue-400 flex items-center justify-center border border-blue-500/30 shrink-0">
+                  <Award size={18} className="sm:w-5 sm:h-5" />
                 </div>
                 <div>
                   <div className="text-xs font-bold text-white">{profile.awardsWon || 'Awwwards / FWA Winner'}</div>
